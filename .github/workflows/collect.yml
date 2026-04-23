@@ -1,0 +1,40 @@
+name: Coleta de Preços
+
+on:
+  # Agendamento: roda duas vezes por dia
+  # Horários em UTC — Brasil (BRT) é UTC-3
+  # 11:00 UTC = 08:00 BRT / 23:00 UTC = 20:00 BRT
+  schedule:
+    - cron: '0 11 * * *'
+    - cron: '0 23 * * *'
+
+  # Permite rodar manualmente pelo painel do GitHub
+  workflow_dispatch:
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Baixa o código do repositório na máquina virtual
+      - name: Checkout do código
+        uses: actions/checkout@v4
+
+      # 2. Instala o Python na versão correta
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      # 3. Instala as dependências do requirements.txt
+      - name: Instalar dependências
+        run: pip install -r requirements.txt
+
+      # 4. Executa o coletor
+      # As variáveis de ambiente vêm dos Secrets configurados no GitHub
+      - name: Executar coletor de preços
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          ML_CLIENT_ID: ${{ secrets.ML_CLIENT_ID }}
+          ML_CLIENT_SECRET: ${{ secrets.ML_CLIENT_SECRET }}
+        run: python collector/main.py
