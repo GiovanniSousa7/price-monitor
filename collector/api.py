@@ -3,52 +3,36 @@ import requests
 
 def search_products(query, limit=5):
     """
-    Busca produtos na Fake Store API.
-    Filtra por termo de busca no título do produto.
-    Substituta temporária da API do Mercado Livre.
+    Busca produtos na DummyJSON API.
+    API aberta, sem autenticação, sem bloqueio de servidor.
     """
-    url = "https://fakestoreapi.com/products"
+    url = f"https://dummyjson.com/products/search"
 
-    response = requests.get(url)
+    params = {"q": query, "limit": limit}
+
+    response = requests.get(url, params=params)
 
     if response.status_code != 200:
         raise Exception(f"Erro na busca: {response.status_code} - {response.text}")
 
-    all_products = response.json()
-
-    # Filtra produtos que contenham o termo no título
-    query_lower = query.lower()
-    filtered = [
-        p for p in all_products
-        if query_lower in p.get("title", "").lower()
-        or query_lower in p.get("category", "").lower()
-    ]
-
-    # Se não encontrar nada com o filtro, retorna os primeiros da lista
-    if not filtered:
-        filtered = all_products
-
-    return filtered[:limit]
+    return response.json().get("products", [])
 
 
 def extract_product_data(item):
     """
-    Normaliza os dados da Fake Store API para o formato do banco.
-    Mantém a mesma estrutura que usaríamos com o Mercado Livre.
+    Normaliza os dados da DummyJSON para o formato do banco.
     """
-    price = float(item.get("price", 0))
-
-    # Simula um preço original (10% acima) para demonstrar o cálculo de desconto
-    original_price = round(price * 1.10, 2)
-    discount       = round((1 - price / original_price) * 100, 2)
+    price          = float(item.get("price", 0))
+    discount       = float(item.get("discountPercentage", 0))
+    original_price = round(price / (1 - discount / 100), 2) if discount > 0 else price
 
     return {
-        "ml_product_id":       f"FAKE{item.get('id')}",
+        "ml_product_id":       f"DUM{item.get('id')}",
         "title":               item.get("title"),
-        "permalink":           f"https://fakestoreapi.com/products/{item.get('id')}",
+        "permalink":           f"https://dummyjson.com/products/{item.get('id')}",
         "category":            item.get("category"),
-        "seller_name":         "FakeStore",
+        "seller_name":         item.get("brand", "DummyStore"),
         "price":               price,
         "original_price":      original_price,
-        "discount_percentage": discount,
+        "discount_percentage": round(discount, 2),
     }

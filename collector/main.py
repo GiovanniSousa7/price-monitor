@@ -2,9 +2,9 @@ from api import search_products, extract_product_data
 from database import get_connection, save_product, save_price_record
 
 SEARCH_QUERIES = [
-    "electronics",
-    "jewelery",
-    "clothing",
+    "laptop",
+    "phone",
+    "watch",
 ]
 
 RESULTS_PER_QUERY = 5
