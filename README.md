@@ -29,3 +29,5 @@ com pipeline completo de coleta, armazenamento, análise e alertas.
 ## Status
 
 🚧 Em desenvolvimento
+
+API do Mercado Livre configurada, porém esperando ativação. Temporariamente substituída pela DummyJSON.
